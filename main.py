@@ -6,9 +6,35 @@ from enet import EnetClient
 
 from pyhap.accessory import Accessory, Bridge
 from pyhap.accessory_driver import AccessoryDriver
-from pyhap.const import CATEGORY_WINDOW_COVERING
+from pyhap.const import CATEGORY_WINDOW_COVERING, CATEGORY_SWITCH
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
+
+
+class Switch(Accessory):
+
+    category = CATEGORY_SWITCH
+
+    def __init__(self, driver, channel, name):
+        super().__init__(driver, name)
+        self.channel = channel
+
+        serv_switch = self.add_preload_service('Switch')
+        self.char_on = serv_switch.configure_char(
+            'On', setter_callback=self.execute_on)
+
+    def execute_on(self, _value):
+        """Execute shutdown -h."""
+        value = 1 if _value else 0
+        self.channel.set_value(value)
+
+    @Accessory.run_at_interval(60)
+    async def run(self):
+        value = self.channel.get_value()
+        if value:
+            self.char_on.set_value(1)
+        else:
+            self.char_on.set_value(0)
 
 
 class Jalousie(Accessory):
@@ -51,7 +77,7 @@ def get_accessory(driver, channel, name):
 
 def get_bridge(driver, client):
     """Call this method to get a Bridge instead of a standalone accessory."""
-    bridge = Bridge(driver, 'Jalousien')
+    bridge = Bridge(driver, 'eNet Smart Home')
 
     for device in client.get_devices():
         location = device.location.split(':')[-1]
@@ -59,12 +85,15 @@ def get_bridge(driver, client):
             continue
         channel = device.channels[0]
         type_ = channel.name
-        if type_ == 'Schalten':
-            # XXX Make a button
+        name = f'{type_} {location}'
+        if type_ == 'Jalousie':
+            bridge.add_accessory(Jalousie(driver, channel, name))
+        elif type_ == 'Schalten':
+            bridge.add_accessory(Switch(driver, channel, name))
             continue
-        bridge.add_accessory(
-            get_accessory(driver, channel, name=f'{type_} {location}')
-        )
+        elif type_ == 'Schwellwert':
+            # XXX Make a info for light amount
+            continue
     return bridge
 
 

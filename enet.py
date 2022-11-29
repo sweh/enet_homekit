@@ -262,7 +262,28 @@ class BaseEnetDevice:
 
 
 class Sensor(BaseEnetDevice):
-    pass
+
+    def __init__(self, client, raw):
+        super().__init__(client, raw)
+        self.create_channels()
+
+    def create_channels(self):
+        print(
+            f"Enet Device {self.name} type {self.device_type} has the following channels:"
+        )
+        for ccg, channel_config_group in enumerate(
+            self._raw["deviceChannelConfigurationGroups"]
+        ):
+            for dc, device_channel in enumerate(channel_config_group["deviceChannels"]):
+                print(
+                    f"  ccg: {ccg} dc: {dc} Channel type: {device_channel['channelTypeID']} area: {device_channel['effectArea']}"
+                )
+                if device_channel["channelTypeID"] != "CT_DEVICE":
+                    try:
+                        c = Channel(self, device_channel)
+                    except TypeError:
+                        continue
+                    self.channels.append(c)
 
 
 class Actuator(BaseEnetDevice):
