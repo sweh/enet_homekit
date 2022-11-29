@@ -1,1 +1,2 @@
 HAP-python[QRCode]
+requests
