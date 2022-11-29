@@ -6,9 +6,29 @@ from enet import EnetClient
 
 from pyhap.accessory import Accessory, Bridge
 from pyhap.accessory_driver import AccessoryDriver
-from pyhap.const import CATEGORY_WINDOW_COVERING, CATEGORY_SWITCH
+from pyhap.const import (
+    CATEGORY_WINDOW_COVERING,
+    CATEGORY_SWITCH,
+    CATEGORY_SENSOR
+)
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
+
+
+class Sensor(Accessory):
+
+    category = CATEGORY_SENSOR
+
+    def __init__(self, driver, channel, name):
+        super().__init__(driver, name)
+        self.channel = channel
+
+        serv_light = self.add_preload_service('LightSensor')
+        self.char_light = serv_light.configure_char('CurrentAmbientLightLevel')
+
+    @Accessory.run_at_interval(120)
+    def run(self):
+        self.char_light.set_value(self.channel.get_value())
 
 
 class Switch(Accessory):
@@ -92,7 +112,7 @@ def get_bridge(driver, client):
             bridge.add_accessory(Switch(driver, channel, name))
             continue
         elif type_ == 'Schwellwert':
-            # XXX Make a info for light amount
+            bridge.add_accessory(Sensor(driver, channel, name))
             continue
     return bridge
 
