@@ -1,7 +1,7 @@
 Homekit Enet Smart Home integration
 ===================================
 
-HAP-python [1] integration for enet smart home jalousie.
+[HAP-python](https://hap-python.readthedocs.io/en/latest/) integration for [enet smart home](https://www.enet-smarthome.com/de/ueber-enet/) jalousie.
 
 Quickstart:
 
