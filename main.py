@@ -1,9 +1,4 @@
-"""An example of how to setup and start an Accessory.
-This is:
-1. Create the Accessory object you want.
-2. Add it to an AccessoryDriver, which will advertise it on the local network,
-    setup a server to answer client queries, etc.
-"""
+"""Setup and start an eNet Accessory."""
 import logging
 import signal
 import os
