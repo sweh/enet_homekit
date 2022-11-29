@@ -1,5 +1,8 @@
 """library for communicating with a Enet Smart Home server from Jung / Gira"""
 
+# Copyright:
+# https://github.com/mnordseth/enet-homeassistant/blob/main/custom_components/enet/aioenet.py
+
 import logging
 import requests
 
