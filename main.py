@@ -4,6 +4,7 @@ import signal
 import os
 from enet import EnetClient
 
+from pathlib import Path
 from pyhap.accessory import Accessory, Bridge
 from pyhap.accessory_driver import AccessoryDriver
 from pyhap.const import (
@@ -13,6 +14,7 @@ from pyhap.const import (
 )
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
+path = Path(__file__).parent / 'enet.state'
 
 
 class Sensor(Accessory):
@@ -110,15 +112,16 @@ def get_bridge(driver, client):
             bridge.add_accessory(Jalousie(driver, channel, name))
         elif type_ == 'Schalten':
             bridge.add_accessory(Switch(driver, channel, name))
-            continue
         elif type_ == 'Schwellwert':
             bridge.add_accessory(Sensor(driver, channel, name))
-            continue
     return bridge
 
 
 # Start the accessory on port 51826
-driver = AccessoryDriver(port=51826)
+driver = AccessoryDriver(
+    port=8089,
+    persist_file=path.resolve(),
+)
 
 # Change `get_accessory` to `get_bridge` if you want to run a Bridge.
 
